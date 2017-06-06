@@ -76,6 +76,10 @@ def text_process(text):
 
 
 def transform_text2sentences(train, test, save_train = 'train_text.p', save_test = 'test_text.p'):
+	'''
+		Transforming raw text into sentences, 
+		if @save_train or @save_test is not None - saves pickles for further use
+	'''
 	train_text = []
 	test_text = []
 	for each in train['Combined']:
@@ -90,6 +94,10 @@ def transform_text2sentences(train, test, save_train = 'train_text.p', save_test
 
 
 def transform_text_into_vectors(train_text, test_text, embedding_size = 100, model_path = 'word2vec10.model'):
+	'''
+		Transforms sentences into sequences of word2vec vectors
+		Returns train, test set and trained word2vec model
+	'''
 	data_for_w2v = []
 	for text in train_text + test_text:
 	    words = text.split(' ')
@@ -109,6 +117,10 @@ def transform_text_into_vectors(train_text, test_text, embedding_size = 100, mod
 
 
 def split_into_XY(data_chng_train, train_text_vectors, step, window, forecast):
+	'''
+		Splits textual and time series data into train or test dataset for hybrid model;
+		objective y_i is percentage change of price movement for next day
+	'''
 	X_train, X_train_text, Y_train = [], [], []
 	for i in range(0, len(data_chng_train), step): 
 	    try:

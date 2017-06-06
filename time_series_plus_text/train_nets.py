@@ -20,6 +20,12 @@ theano.config.compute_test_value = "ignore"
 
 
 def neural_network(window, embedding):
+	'''
+		Hybrid neural network for prediction based both on time series and text:
+		- model1 takes time series of @window length and passes it into MLP
+		- model2 takes averages word2vec vectors from daily news and passes them into LSTM
+		- model1 and model2 are merged via other MLP network
+	'''
 	model1 = Sequential()
 	model1.add(Dense(64, input_dim=window,
 	                activity_regularizer=regularizers.l2(0.01)))
@@ -69,9 +75,12 @@ X_train, X_train_text, Y_train = split_into_XY(data_chng_train, train_text_vecto
 X_test, X_test_text, Y_test = split_into_XY(data_chng_test, test_text_vectors, 1, 10, 1)
 
 final_model = neural_network(10, 100)
+
+# seting callbacks for saving best models and scheduling learning rate
 reduce_lr = ReduceLROnPlateau(monitor='val_acc', factor=0.9, patience=50, min_lr=0.000001, verbose=1)
 checkpointer = ModelCheckpoint(filepath="test.hdf5", verbose=1, save_best_only=True)
 
+# training the model
 history = final_model.fit([X_train, X_train_text], Y_train, 
           nb_epoch = 500, 
           batch_size = 128, 
@@ -80,6 +89,7 @@ history = final_model.fit([X_train, X_train_text], Y_train,
           callbacks=[reduce_lr, checkpointer],
           shuffle=True)
 
+# plotting performance
 plt.figure()
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
